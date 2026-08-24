@@ -38,11 +38,11 @@ def _load(adapter: str):
     try:
         PeftConfig.from_pretrained(adapter)
         model = AutoPeftModelForCausalLM.from_pretrained(
-            adapter, torch_dtype=dtype, device_map="auto")
+            adapter, dtype=dtype, device_map="auto")
     except ValueError:
         # Not a PEFT adapter: assume a merged full model.
         model = AutoModelForCausalLM.from_pretrained(
-            adapter, torch_dtype=dtype, device_map="auto")
+            adapter, dtype=dtype, device_map="auto")
     tokenizer = AutoTokenizer.from_pretrained(adapter)
     model.eval()
     return model, tokenizer
