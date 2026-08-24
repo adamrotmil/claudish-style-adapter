@@ -4,9 +4,25 @@ State handoff for continuing this project in a new Claude session (Claude Deskto
 RunPod GPU). Read `../README.md` first for the pipeline overview; this file covers
 what is already done, environment gotchas, and the exact next steps.
 
-## Where things stand (2026-08-24)
+## Where things stand (2026-08-24, standalone repo)
 
-Branch: `claude/claudish-style-adapter-bzqik0` on `adamrotmil/portfolio`.
+This project now lives in its own repo at `~/dev/claudish-style-adapter` (imported from
+the `claude/claudish-style-adapter-bzqik0` branch of `adamrotmil/portfolio`, which still
+holds the original history). Everything that used to be under `claudish-adapter/` is now
+at the repo root; no GitHub remote yet.
+
+Since the move, on the desktop (Apple Silicon, 10 cores, 32 GB):
+
+- Environment: `uv venv --python 3.12 .venv`, then
+  `uv pip install -p .venv/bin/python -r requirements.txt --extra-index-url https://pypi.programasweights.com/simple/`.
+  Both translator directions verified working (llama.cpp uses Metal here, ~2 s/call).
+- Seeds: `data/english_seeds.txt` — 20,000 seeds from Alpaca + Dolly.
+- Pairs: generating as 4 parallel shards, each with its own output file
+  (`data/shards/pairs.shard{0..3}.jsonl`, `--shard i/4`, logs in `logs/`).
+  ~1.5–3.3 s/seed per shard → ~4–5 h total. Resumable per shard. When all finish:
+  `cat data/shards/pairs.shard*.jsonl > data/claudish_pairs.jsonl` (shards are
+  disjoint, no dedup needed), then `03_format_dataset.py`.
+- RunPod kit: `docs/RUNPOD.md` + `scripts/runpod_train.sh` cover the GPU steps.
 
 Done and verified by real runs:
 
