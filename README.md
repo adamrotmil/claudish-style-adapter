@@ -131,6 +131,15 @@ Or run the Gradio demo:
 python demo/app.py --adapter YourUsername/claudish-style-adapter
 ```
 
+## The lean alternative: a style guide instead of weights
+
+[`docs/claudish-style.md`](docs/claudish-style.md) is a multi-shot style reference —
+rules, signature moves, worked examples, and diagnosed failure cases. Point any capable
+model at it ("restyle this text per the guide") and you get higher-quality translations
+than the adapter, with the model's intelligence intact. The adapter's advantage is that
+it runs anywhere without an API; the guide's advantage is quality. They ship together on
+purpose.
+
 ## Repository layout
 
 | Path | Purpose |
