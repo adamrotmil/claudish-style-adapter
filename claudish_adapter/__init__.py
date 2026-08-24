@@ -62,6 +62,8 @@ def rewrite(text: str, direction: str = "to_claudish",
             **inputs,
             max_new_tokens=max_new_tokens,
             do_sample=False,
+            no_repeat_ngram_size=8,
+            repetition_penalty=1.05,
             pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
         )
     completion = output[0][inputs["input_ids"].shape[1]:]

@@ -38,7 +38,10 @@ def hf_seeds(limit_per_source: int):
     sources = [
         # (dataset, split, fields to extract)
         ("tatsu-lab/alpaca", "train", ["instruction", "output"]),
-        ("databricks/databricks-dolly-15k", "train", ["instruction", "response"]),
+        # "context" adds declarative wiki-style paragraphs — balances the
+        # instruction-heavy fields so the adapter learns to restyle statements,
+        # not just imperatives.
+        ("databricks/databricks-dolly-15k", "train", ["instruction", "response", "context"]),
     ]
     for name, split, fields in sources:
         try:

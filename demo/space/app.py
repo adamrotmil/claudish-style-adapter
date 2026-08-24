@@ -38,7 +38,7 @@ def run(text: str, direction: str) -> str:
         return ""
     prompt = PROMPT_TEMPLATE.format(
         instruction=INSTRUCTIONS[direction], input=text)
-    out = llm(prompt, max_tokens=768, temperature=0.0,
+    out = llm(prompt, max_tokens=768, temperature=0.0, repeat_penalty=1.1,
               stop=["### Instruction:", "### Input:"])
     return out["choices"][0]["text"].strip()
 
