@@ -36,10 +36,12 @@ models, ...).
 
 Parallel data was generated with the official bidirectional Claudish translator from
 [ProgramAsWeights](https://programasweights.com/claudish) (function ids
-`ca9d5165b6c8e6615529` and `e469f61ccab2699fbd51`), then used to fine-tune
-`{base_model}` with QLoRA (4-bit NF4, LoRA on all linear projections). Both directions were
-trained in one multi-task run. Pipeline code:
-[claudish-adapter](https://github.com/{gh_repo}/tree/main/claudish-adapter).
+`ca9d5165b6c8e6615529` and `e469f61ccab2699fbd51`): 20k seed texts → 17.8k raw pairs →
+14k pairs after an embedding-based meaning-preservation filter → 28.1k instruction
+examples (both directions). `{base_model}` was then fine-tuned with LoRA (bf16, r=32,
+all linear projections, 2 epochs) in one multi-task run. Held-out evaluation:
+reference similarity 0.87 (→ Claudish) / 0.93 (→ English), meaning preservation 0.86 /
+0.87. Pipeline code: [claudish-style-adapter](https://github.com/{gh_repo}).
 
 ## Usage
 
@@ -73,6 +75,11 @@ plain, direct English while preserving all facts and meaning."*
 - Surface-layer style rewriting only: the adapter is trained to preserve facts, certainty,
   and implications, and to never invent content — but verify outputs for high-stakes text.
 - English only; not intended for restyling code blocks or structured markup.
+- Works best on sentence-to-paragraph inputs (training texts were 40–800 characters).
+  The English → Claudish direction can degenerate on much longer inputs — chunk long
+  documents into paragraphs first.
+- Instruction-shaped inputs ("Classify the following...") may occasionally be *answered*
+  rather than restyled.
 """
 
 
@@ -82,7 +89,7 @@ def main() -> None:
     parser.add_argument("--repo", required=True, help="e.g. YourUsername/claudish-style-adapter")
     parser.add_argument("--merge", action="store_true",
                         help="merge LoRA into the base model and push full weights")
-    parser.add_argument("--gh-repo", default="adamrotmil/portfolio",
+    parser.add_argument("--gh-repo", default="adamrotmil/claudish-style-adapter",
                         help="GitHub repo linked from the model card")
     parser.add_argument("--private", action="store_true")
     args = parser.parse_args()
