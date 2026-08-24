@@ -17,12 +17,18 @@ Since the move, on the desktop (Apple Silicon, 10 cores, 32 GB):
   `uv pip install -p .venv/bin/python -r requirements.txt --extra-index-url https://pypi.programasweights.com/simple/`.
   Both translator directions verified working (llama.cpp uses Metal here, ~2 s/call).
 - Seeds: `data/english_seeds.txt` — 20,000 seeds from Alpaca + Dolly.
-- Pairs: generating as 4 parallel shards, each with its own output file
-  (`data/shards/pairs.shard{0..3}.jsonl`, `--shard i/4`, logs in `logs/`).
-  ~1.5–3.3 s/seed per shard → ~4–5 h total. Resumable per shard. When all finish:
-  `cat data/shards/pairs.shard*.jsonl > data/claudish_pairs.jsonl` (shards are
-  disjoint, no dedup needed), then `03_format_dataset.py`.
+- Pairs: DONE — generated as 4 parallel shards (~2.5 h wall clock), merged to
+  `data/claudish_pairs.jsonl`: 17,768 raw pairs (~11% of translations rejected
+  by the script's built-in degeneracy filter).
+- Meaning-preservation filter: DONE — new `scripts/02b_filter_pairs.py` embeds
+  pairs with MiniLM and drops those where claudish or roundtrip drifts from the
+  source (threshold 0.70/0.70, calibrated by inspecting the borderline band).
+  Kept 14,050 pairs (`data/claudish_pairs.filtered.jsonl`); rejects with scores
+  in `data/claudish_pairs.rejected.jsonl`.
+- SFT split: DONE — `data/sft/train.jsonl` (26,695) + `val.jsonl` (1,405),
+  both directions mixed, formatted from the *filtered* pairs.
 - RunPod kit: `docs/RUNPOD.md` + `scripts/runpod_train.sh` cover the GPU steps.
+  Next action: copy `data/sft/` to the pod and run `scripts/runpod_train.sh`.
 
 Done and verified by real runs:
 
