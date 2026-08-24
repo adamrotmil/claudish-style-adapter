@@ -29,6 +29,21 @@ Since the move, on the desktop (Apple Silicon, 10 cores, 32 GB):
   both directions mixed, formatted from the *filtered* pairs.
 - RunPod kit: `docs/RUNPOD.md` + `scripts/runpod_train.sh` cover the GPU steps.
   Next action: copy `data/sft/` to the pod and run `scripts/runpod_train.sh`.
+- V1 SHIPPED: trained on 3xH100 (12 min, bf16 LoRA DDP), evaluated (ref sim
+  0.87/0.93, meaning 0.86/0.87), published at
+  https://huggingface.co/adamrotmil/claudish-style-adapter (+ Q4_K_M GGUF in gguf/).
+  Known v1 limits: ->Claudish degenerates on inputs >>800 chars; instruction-shaped
+  inputs sometimes answered rather than restyled. Anti-repetition decoding added to
+  the client as a first mitigation.
+- V2 dataset: DONE - 12k new seeds (declarative Dolly context + longer, v1-disjoint)
+  -> 9,831 raw -> 7,763 filtered; plus 5,000 synthetic long pairs (02c, 3-6 components
+  >=150 chars each; 18% of final pairs now >800 chars, p90 1,449). Final:
+  26,813 pairs -> data/sft/ with 50,945 train + 2,681 val examples.
+- V2 training: pending a fresh GPU pod. Use `--max-length 2048` (long examples would
+  truncate at 1024). Then evaluate - add a long-input eval slice and `--judge` - and
+  publish to the same HF repo.
+- HF Space demo: written (demo/space/), blocked on HF PRO subscription for Gradio
+  hosting; deployable in one command once subscribed.
 
 Done and verified by real runs:
 

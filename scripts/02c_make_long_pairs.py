@@ -21,13 +21,18 @@ def main() -> None:
     parser.add_argument("--pairs", default="data/claudish_pairs.filtered.jsonl")
     parser.add_argument("--out", default="data/claudish_pairs.long.jsonl")
     parser.add_argument("--n", type=int, default=4000, help="long pairs to build")
-    parser.add_argument("--min-parts", type=int, default=2)
-    parser.add_argument("--max-parts", type=int, default=4)
+    parser.add_argument("--min-parts", type=int, default=3)
+    parser.add_argument("--max-parts", type=int, default=6)
+    parser.add_argument("--min-part-chars", type=int, default=150,
+                        help="only use components at least this long, so the "
+                             "result is genuinely long, not confetti")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
     with open(args.pairs, encoding="utf-8") as f:
         pairs = [json.loads(line) for line in f if line.strip()]
+    pairs = [p for p in pairs if len(p["english"]) >= args.min_part_chars]
+    print(f"{len(pairs)} pairs usable as components (>= {args.min_part_chars} chars)")
 
     rng = random.Random(args.seed)
     written = 0
