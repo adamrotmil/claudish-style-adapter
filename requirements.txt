@@ -1,0 +1,5 @@
+# Data generation (Phases 1-4). Install with:
+#   pip install -r requirements.txt --extra-index-url https://pypi.programasweights.com/simple/
+programasweights>=0.4
+datasets>=2.19
+tqdm>=4.66

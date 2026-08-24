@@ -1,0 +1,12 @@
+# Training / evaluation / publishing (Phases 5-9). Needs a CUDA GPU for training.
+torch>=2.3
+transformers>=4.44
+trl>=0.12
+peft>=0.12
+bitsandbytes>=0.43
+accelerate>=0.33
+datasets>=2.19
+sentence-transformers>=3.0
+huggingface_hub>=0.24
+gradio>=4.40
+anthropic>=0.34   # optional: Claude-as-judge in scripts/05_evaluate.py
