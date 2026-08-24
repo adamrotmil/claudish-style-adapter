@@ -85,6 +85,12 @@ def main() -> None:
                         "gate_proj", "up_proj", "down_proj"],
     )
 
+    # transformers 5 dropped warmup_ratio; compute ~3% of total steps directly.
+    world_size = int(os.environ.get("WORLD_SIZE", "1"))
+    steps_per_epoch = max(1, len(dataset["train"])
+                          // (args.batch_size * args.grad_accum * world_size))
+    warmup_steps = max(10, int(0.03 * steps_per_epoch * args.epochs))
+
     sft_config = SFTConfig(
         output_dir=args.out_dir,
         num_train_epochs=args.epochs,
@@ -93,7 +99,7 @@ def main() -> None:
         gradient_accumulation_steps=args.grad_accum,
         max_length=args.max_length,
         lr_scheduler_type="cosine",
-        warmup_ratio=0.03,
+        warmup_steps=warmup_steps,
         logging_steps=20,
         eval_strategy="steps",
         eval_steps=200,
