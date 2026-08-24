@@ -1,6 +1,6 @@
 # Training / evaluation / publishing (Phases 5-9). Needs a CUDA GPU for training.
 torch>=2.3
-transformers>=4.44
+transformers>=4.56   # `dtype=` kwarg in from_pretrained
 trl>=0.12
 peft>=0.12
 bitsandbytes>=0.43

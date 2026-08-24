@@ -4,13 +4,17 @@
 Uses TRL's SFTTrainer with PEFT LoRA on a 4-bit NF4 quantized base model.
 Defaults are tuned for style transfer on a single 24 GB GPU.
 
-Example:
+Example (single GPU):
     python scripts/04_train_qlora.py \
         --base-model Qwen/Qwen2.5-7B-Instruct \
         --data-dir data/sft \
         --out-dir outputs/claudish-lora
+
+Multi-GPU (DDP, one model replica per GPU):
+    torchrun --nproc_per_node=3 scripts/04_train_qlora.py --no-4bit ...
 """
 import argparse
+import os
 
 
 def main() -> None:
@@ -56,11 +60,16 @@ def main() -> None:
             bnb_4bit_compute_dtype=torch.bfloat16,
         )
 
+    # Under torchrun each process must own exactly one GPU; device_map="auto"
+    # would instead shard one replica across all visible GPUs.
+    local_rank = int(os.environ.get("LOCAL_RANK", "-1"))
+    device_map = {"": local_rank} if local_rank >= 0 else "auto"
+
     model = AutoModelForCausalLM.from_pretrained(
         args.base_model,
         quantization_config=quant_config,
-        torch_dtype=torch.bfloat16,
-        device_map="auto",
+        dtype=torch.bfloat16,
+        device_map=device_map,
     )
     tokenizer = AutoTokenizer.from_pretrained(args.base_model)
     if tokenizer.pad_token is None:
@@ -91,6 +100,8 @@ def main() -> None:
         save_strategy="epoch",
         bf16=True,
         gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={"use_reentrant": False},
+        ddp_find_unused_parameters=False,
         report_to="none",
     )
 

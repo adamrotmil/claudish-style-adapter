@@ -13,10 +13,21 @@ fi
 
 pip install -r requirements-train.txt
 
-python scripts/04_train_qlora.py \
-  --base-model "${BASE_MODEL:-Qwen/Qwen2.5-7B-Instruct}" \
-  --data-dir data/sft \
-  --out-dir outputs/claudish-lora \
-  "$@"
+NGPU=$(nvidia-smi --list-gpus | wc -l)
+if [ "$NGPU" -gt 1 ]; then
+  # Data-parallel: one bf16 LoRA replica per GPU (no 4-bit needed on big cards).
+  torchrun --nproc_per_node="$NGPU" scripts/04_train_qlora.py \
+    --base-model "${BASE_MODEL:-Qwen/Qwen2.5-7B-Instruct}" \
+    --data-dir data/sft \
+    --out-dir outputs/claudish-lora \
+    --no-4bit \
+    "$@"
+else
+  python scripts/04_train_qlora.py \
+    --base-model "${BASE_MODEL:-Qwen/Qwen2.5-7B-Instruct}" \
+    --data-dir data/sft \
+    --out-dir outputs/claudish-lora \
+    "$@"
+fi
 
 python scripts/05_evaluate.py --adapter outputs/claudish-lora --data-dir data/sft --n 100
