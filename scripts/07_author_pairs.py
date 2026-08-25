@@ -60,6 +60,8 @@ def main() -> None:
                         help="after authoring, judge this many of the new pairs")
     parser.add_argument("--workers", type=int, default=8,
                         help="concurrent authoring requests")
+    parser.add_argument("--max-out", type=int, default=1500,
+                        help="max output tokens per authored pair")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
@@ -86,10 +88,11 @@ def main() -> None:
     todo = [t for t in texts if text_key(t) not in done][: args.n]
     print(f"{len(texts)} candidate texts, {len(done)} already authored, {len(todo)} to author")
 
-    def ask(model, prompt, max_tokens=1500, use_system=False):
+    def ask(model, prompt, max_tokens=1500, use_system=False, no_thinking=False):
         response = client.messages.create(
             model=model, max_tokens=max_tokens,
             system=system if use_system else anthropic.NOT_GIVEN,
+            thinking={"type": "disabled"} if no_thinking else anthropic.NOT_GIVEN,
             messages=[{"role": "user", "content": prompt}])
         return "".join(b.text for b in response.content if b.type == "text").strip()
 
@@ -99,7 +102,7 @@ def main() -> None:
 
     def author(eng):
         try:
-            claud = ask(args.model, eng, use_system=True)
+            claud = ask(args.model, eng, max_tokens=args.max_out, use_system=True, no_thinking=True)
         except Exception as exc:  # noqa: BLE001 - keep the run alive
             print(f"error, skipping: {exc}")
             return
