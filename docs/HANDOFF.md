@@ -44,6 +44,14 @@ Since the move, on the desktop (Apple Silicon, 10 cores, 32 GB):
   publish to the same HF repo.
 - HF Space demo: written (demo/space/), blocked on HF PRO subscription for Gradio
   hosting; deployable in one command once subscribed.
+- V3 SHIPPED (2026-08-25): Opus-authored dataset (9.4k shorts + 1.2k clustered long
+  docs, QC-filtered by 09_filter_authored.py: 3.4% rejected as answered, 0.6%
+  unfaithful) -> 10,227 pairs -> trained (~1 h, 1xH100) -> published. Judged eval
+  improved on every axis vs v2 (see model card table). Weakest remaining axis:
+  long-input faithfulness (1.8-2.8/5). Style guide fixed en route: additive-contrast
+  rule ("a contrast asserts its negation"). v3 data + adapter backed up in
+  outputs_v3_backup/ on the desktop. Judge calls need max_tokens >= 800 (Opus thinks
+  first); authoring calls run with thinking disabled for cost.
 
 Done and verified by real runs:
 
