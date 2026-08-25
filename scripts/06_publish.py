@@ -64,6 +64,39 @@ judged 3.6/5 style, 3.8/5 faithful) — the usual distillation gap. For quality-
 restyling, use the style guide with a capable instruction-following model; it ships in
 the same repo for exactly this reason.
 
+## Examples (real held-out outputs, with the judge's scores)
+
+**The good** — English → Claudish (style 3, faithful 5):
+
+> *In:* Compare and contrast two potential methods of customer segmentation.
+> *Out:* Set two candidate customer segmentation methods against each other: where they
+> align, and where they diverge.
+
+**The good** — Claudish → English (style 5, faithful 5):
+
+> *In:* Sort the items along the alphabetical spine.
+> *Out:* Organize the items in alphabetical order.
+
+**The bad** — English → Claudish (style 3, faithful 3): the restyle works but the added
+imagery ("a seam in the fabric of how we live") edges past what the input states:
+
+> *In:* Six philosophical questions are: - What is the purpose of life? - Are our
+> actions predetermined or do we have free will? ...
+> *Out:* Six philosophical questions, each one a seam in the fabric of how we live: -
+> What is the purpose of life? - Are our actions predetermined, or do we hold free
+> will? ...
+
+**The ugly** — a long technical listing (style 2, faithful 1): the prose survives but
+the model **silently corrupted numbers** (learning rate 0.001 → 0.01, max epochs
+100 → 10). This is the long-input faithfulness limitation in the flesh — never trust
+the adapter with data-bearing text you don't verify:
+
+> *In:* Configuration Parameters: - Optimizer: Adam - Loss Function: Binary Cross
+> Entropy - Learning rate: 0.001 - Batch size: 32 - Maximum Epochs: 100 ...
+> *Out:* Configuration Parameters — the knobs that can be tuned: - Optimizer: Adam -
+> Loss Function: Binary Cross Entropy - Learning rate: 0.01 - Batch size: 32 -
+> Maximum Epochs: 10 ...
+
 ## Usage
 
 ```python
@@ -100,6 +133,22 @@ plain, direct English while preserving all facts and meaning."*
   in v2/v3), but their faithfulness scores are the weakest — verify long outputs.
 - Instruction-shaped inputs are trained to be restyled, never answered (v3 QC-filtered
   the failure); rare exceptions can still occur.
+
+## Contributing
+
+Improvements are welcome, in either venue:
+
+- **This Hub repo**: open a Discussion or a Pull Request in the Community tab —
+  including better eval examples, quantizations, or corrected metadata.
+- **[The GitHub repo](https://github.com/{gh_repo})**: the entire pipeline is
+  reproducible from scripts `01`–`09` (seed collection → authoring → QC filtering →
+  training → judged evaluation → publishing), so a better dataset or training recipe
+  can be carried end-to-end and measured with the same judge.
+
+Apache-2.0 all the way down: fine-tunes, quantizations, and derivative adapters are
+explicitly encouraged. The most valuable open problem is **long-input faithfulness**
+(see the table above); a close second is closing the distillation gap to the training
+data. If you train something better, open an issue — happy to link it here.
 """
 
 
