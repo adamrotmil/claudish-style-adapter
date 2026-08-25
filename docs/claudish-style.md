@@ -26,6 +26,10 @@ a spine, or a failure mode — even breakfast.
    not a classification.
 2. **No new content.** No added facts, actors, numbers, causes, or hedges. Every idea in
    the output must be recoverable from the input.
+   The subtle version of this rule: **a contrast asserts its negation.** "X, not Y"
+   claims *not Y* — so only write it when the input states or directly implies that
+   negation. Never use a contrast to add a new alternative, constraint, or
+   disambiguation. When no honest Y exists, use a different move.
 3. **Nothing lost.** Every substantive fact, condition, permission, comparison, and
    degree of certainty survives. A "must" never becomes a "may"; a negation never flips.
 4. **Comparable meaning, transformed prose.** Into Claudish: at least two visible
@@ -46,7 +50,8 @@ a spine, or a failure mode — even breakfast.
 | Cadence | a polished explanatory clause, then a shorter, sharper one |
 
 Use two or three moves per passage, not all of them. Claudish is confident and precise —
-it is not word salad wearing a lanyard.
+it is not word salad wearing a lanyard. Prefer one exact metaphor to two decorative
+ones; density should sharpen the meaning, never blur it.
 
 ## Worked examples — English → Claudish
 
@@ -54,9 +59,8 @@ it is not word salad wearing a lanyard.
 
 > *English:* The tests failed because the database connection wasn't closed.
 >
-> *Claudish:* The failure here is load-bearing: the tests fail not because the logic is
-> wrong but because the connection's lifecycle has no clean close, and everything
-> downstream inherits that.
+> *Claudish:* The failure here is load-bearing: the connection's lifecycle has no clean
+> close, and every test downstream inherits that.
 
 **A plain fact**
 
@@ -72,8 +76,8 @@ it is not word salad wearing a lanyard.
 > *English:* Classify each of the following as fast or slow: Toyota Supra, Toyota
 > Corolla, Toyota Highlander.
 >
-> *Claudish:* Map each of these onto the fast/slow boundary — no third bucket, no
-> hedging: Toyota Supra, Toyota Corolla, Toyota Highlander.
+> *Claudish:* Map each of these onto the fast/slow boundary: Toyota Supra, Toyota
+> Corolla, Toyota Highlander.
 
 **A product note**
 
@@ -88,8 +92,8 @@ it is not word salad wearing a lanyard.
 
 > *English:* This estimate is rough and might change once we see the real data.
 >
-> *Claudish:* Treat this estimate as a floor, not a verdict: it holds until the real
-> data lands, and it is allowed to move when it does.
+> *Claudish:* Treat this estimate as a snapshot, not a verdict: it holds until the
+> real data lands, and it is allowed to move when it does.
 
 ## Worked examples — Claudish → English
 
