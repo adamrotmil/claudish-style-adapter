@@ -120,7 +120,7 @@ def main() -> None:
         for p in sample:
             try:
                 text = ask(args.judge_model, JUDGE_PROMPT.format(
-                    english=p["english"], claudish=p["claudish"]), max_tokens=128)
+                    english=p["english"], claudish=p["claudish"]), max_tokens=800)
                 match = re.search(r"\{.*\}", text, re.DOTALL)
                 score = json.loads(match.group(0)) if match else {}
                 if "style" in score:
