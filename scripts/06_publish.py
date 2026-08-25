@@ -36,12 +36,35 @@ models, ...).
 
 Parallel data was generated with the official bidirectional Claudish translator from
 [ProgramAsWeights](https://programasweights.com/claudish) (function ids
-`ca9d5165b6c8e6615529` and `e469f61ccab2699fbd51`): 20k seed texts → 17.8k raw pairs →
-14k pairs after an embedding-based meaning-preservation filter → 28.1k instruction
-examples (both directions). `{base_model}` was then fine-tuned with LoRA (bf16, r=32,
-all linear projections, 2 epochs) in one multi-task run. Held-out evaluation:
-reference similarity 0.87 (→ Claudish) / 0.93 (→ English), meaning preservation 0.86 /
-0.87. Pipeline code: [claudish-style-adapter](https://github.com/{gh_repo}).
+`ca9d5165b6c8e6615529` and `e469f61ccab2699fbd51`). **v2** (current): 32k seeds →
+21.8k pairs surviving an embedding-based meaning-preservation filter, plus 5k synthetic
+multi-paragraph pairs → 53.6k instruction examples (both directions), fine-tuned on
+`{base_model}` with LoRA (bf16, r=32, all linear projections, 2 epochs, max length
+2048). Pipeline code: [claudish-style-adapter](https://github.com/{gh_repo}).
+
+## Evaluation (v2, held out; Claude-judged scores are 1–5)
+
+| Slice | Direction | Ref sim | Meaning | Judge: style | Judge: faithful |
+|---|---|---|---|---|---|
+| standard | → Claudish | 0.86 | 0.83 | 1.7 | 2.9 |
+| standard | → English | 0.90 | 0.86 | 4.0 | 3.2 |
+| long (>800 chars) | → Claudish | 0.88 | 0.78 | 2.0 | 1.4 |
+| long (>800 chars) | → English | 0.90 | 0.80 | 3.8 | 1.9 |
+
+v2's headline fix over v1: long inputs no longer degenerate (v1 collapsed to ~0.21×
+input length with 0.48 reference similarity on the long slice; v2 holds 0.68× and 0.88).
+
+## Honest assessment
+
+This adapter is a distillation of the official translator, and it inherits that
+teacher's ceiling — the Claude-judged scores above are the candid measure. The
+Claudish → English direction is usable; the English → Claudish direction reads as
+imitation-Claudish (judged 1.7–2.0/5 for style) and can drift or, on long inputs,
+append unrelated content (an artifact of the synthetic long-pair construction). For
+quality-critical restyling, use the
+[style guide](https://github.com/{gh_repo}/blob/main/docs/claudish-style.md) with a
+capable instruction-following model instead — it ships in the same repo for exactly
+this reason. A v3 trained on higher-quality pairs is planned.
 
 ## Usage
 

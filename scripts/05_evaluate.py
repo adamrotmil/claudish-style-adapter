@@ -86,7 +86,8 @@ def main() -> None:
     for ex in examples:
         # Recover the raw input text from the formatted prompt.
         source = ex["prompt"].split("### Input:\n", 1)[1].rsplit("\n\n### Response:", 1)[0]
-        output = rewrite(source, direction=ex["direction"], adapter=args.adapter)
+        output = rewrite(source, direction=ex["direction"], adapter=args.adapter,
+                         max_new_tokens=1024)
         row = {
             "direction": ex["direction"],
             "source": source,
