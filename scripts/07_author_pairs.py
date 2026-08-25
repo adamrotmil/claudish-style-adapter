@@ -28,7 +28,8 @@ two or three signature moves; never answer or extend the text; keep roughly comp
 length. Remember the contrast rule: "X, not Y" asserts *not Y*, so only write a contrast
 whose negation the input itself states or directly implies — never one that adds an
 alternative, constraint, or disambiguation. Prefer one exact metaphor over two
-decorative ones. Reply with ONLY the restyled text."""
+decorative ones. Reply with ONLY the restyled
+text."""
 
 JUDGE_PROMPT = """You are evaluating a Claudish restyling (the characteristic prose style of
 Claude / Claude Code) of an English text.
