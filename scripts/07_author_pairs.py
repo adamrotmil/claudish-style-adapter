@@ -22,17 +22,10 @@ import re
 
 STYLE_GUIDE_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "claudish-style.md")
 
-AUTHOR_PROMPT = """{guide}
-
----
-
-Rewrite the following text into Claudish, exactly per the guide above: preserve every
-fact, instruction, degree of certainty, and implication; use two or three signature
-moves; never answer or extend the text; keep roughly comparable length. Reply with ONLY
-the restyled text.
-
-TEXT:
-{text}"""
+AUTHOR_INSTRUCTION = """Rewrite the text the user sends into Claudish, exactly per the style
+guide above: preserve every fact, instruction, degree of certainty, and implication; use
+two or three signature moves; never answer or extend the text; keep roughly comparable
+length. Reply with ONLY the restyled text."""
 
 JUDGE_PROMPT = """You are evaluating a Claudish restyling (the characteristic prose style of
 Claude / Claude Code) of an English text.
@@ -61,12 +54,21 @@ def main() -> None:
     parser.add_argument("--judge-model", default="claude-opus-5")
     parser.add_argument("--judge-sample", type=int, default=0,
                         help="after authoring, judge this many of the new pairs")
+    parser.add_argument("--workers", type=int, default=8,
+                        help="concurrent authoring requests")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
     import anthropic
-    client = anthropic.Anthropic()
+    client = anthropic.Anthropic(max_retries=8)
     guide = open(STYLE_GUIDE_PATH, encoding="utf-8").read()
+    # The guide + instruction go in the system block with cache_control, so the
+    # large prefix is billed once per 5-minute window, not once per request.
+    system = [{"type": "text", "text": guide + "\n\n---\n\n" + AUTHOR_INSTRUCTION,
+               "cache_control": {"type": "ephemeral"}}]
 
     with open(args.pairs, encoding="utf-8") as f:
         texts = [json.loads(line)["english"] for line in f if line.strip()]
@@ -77,37 +79,40 @@ def main() -> None:
     if os.path.exists(args.out):
         with open(args.out, encoding="utf-8") as f:
             done = {text_key(json.loads(line)["english"]) for line in f if line.strip()}
-    print(f"{len(texts)} candidate texts, {len(done)} already authored")
+    todo = [t for t in texts if text_key(t) not in done][: args.n]
+    print(f"{len(texts)} candidate texts, {len(done)} already authored, {len(todo)} to author")
 
-    def ask(model, prompt, max_tokens=1500):
+    def ask(model, prompt, max_tokens=1500, use_system=False):
         response = client.messages.create(
             model=model, max_tokens=max_tokens,
+            system=system if use_system else anthropic.NOT_GIVEN,
             messages=[{"role": "user", "content": prompt}])
         return "".join(b.text for b in response.content if b.type == "text").strip()
 
-    written = 0
+    lock = threading.Lock()
     new_pairs = []
-    with open(args.out, "a", encoding="utf-8") as out:
-        for eng in texts:
-            if written >= args.n:
-                break
-            if text_key(eng) in done:
-                continue
-            try:
-                claud = ask(args.model, AUTHOR_PROMPT.format(guide=guide, text=eng))
-            except Exception as exc:  # noqa: BLE001 - keep the run alive
-                print(f"error, skipping: {exc}")
-                continue
-            if not claud or len(claud) < 20:
-                continue
-            pair = {"english": eng, "claudish": claud, "author": args.model}
+    out = open(args.out, "a", encoding="utf-8")
+
+    def author(eng):
+        try:
+            claud = ask(args.model, eng, use_system=True)
+        except Exception as exc:  # noqa: BLE001 - keep the run alive
+            print(f"error, skipping: {exc}")
+            return
+        if not claud or len(claud) < 20:
+            return
+        pair = {"english": eng, "claudish": claud, "author": args.model}
+        with lock:
             out.write(json.dumps(pair, ensure_ascii=False) + "\n")
             out.flush()
             new_pairs.append(pair)
-            written += 1
-            if written % 20 == 0:
-                print(f"{written}/{args.n}")
-    print(f"authored {written} pairs -> {args.out}")
+            if len(new_pairs) % 100 == 0:
+                print(f"{len(new_pairs)}/{len(todo)}")
+
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        list(pool.map(author, todo))
+    out.close()
+    print(f"authored {len(new_pairs)} pairs -> {args.out}")
 
     if args.judge_sample and new_pairs:
         sample = random.Random(1).sample(new_pairs, min(args.judge_sample, len(new_pairs)))
