@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "claudish-demo",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["demo/space/app.py"],
+      "port": 7860
+    }
+  ]
+}
