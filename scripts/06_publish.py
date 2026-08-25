@@ -34,37 +34,35 @@ models, ...).
 
 ## How it was trained
 
-Parallel data was generated with the official bidirectional Claudish translator from
-[ProgramAsWeights](https://programasweights.com/claudish) (function ids
-`ca9d5165b6c8e6615529` and `e469f61ccab2699fbd51`). **v2** (current): 32k seeds →
-21.8k pairs surviving an embedding-based meaning-preservation filter, plus 5k synthetic
-multi-paragraph pairs → 53.6k instruction examples (both directions), fine-tuned on
-`{base_model}` with LoRA (bf16, r=32, all linear projections, 2 epochs, max length
-2048). Pipeline code: [claudish-style-adapter](https://github.com/{gh_repo}).
+**v3** (current): the Claudish side of every training pair is authored by Claude
+Opus per the repo's [style guide](https://github.com/{gh_repo}/blob/main/docs/claudish-style.md),
+replacing the earlier distillation of the official
+[ProgramAsWeights translator](https://programasweights.com/claudish) (whose pairs judged
+2.2/5 style, 2.4/5 faithfulness — the v1/v2 quality ceiling). 10.2k pairs survived a
+QC filter (rejecting answered-instead-of-restyled and unfaithful rewrites), including
+1.2k coherent multi-paragraph documents built from embedding-clustered related texts.
+Fine-tuned on `{base_model}` with LoRA (bf16, r=32, all linear projections, 2 epochs,
+max length 2048). Pipeline code:
+[claudish-style-adapter](https://github.com/{gh_repo}).
 
-## Evaluation (v2, held out; Claude-judged scores are 1–5)
+## Evaluation (v3 held out; Claude-judged scores are 1-5; v2 in parentheses)
 
-| Slice | Direction | Ref sim | Meaning | Judge: style | Judge: faithful |
-|---|---|---|---|---|---|
-| standard | → Claudish | 0.86 | 0.83 | 1.7 | 2.9 |
-| standard | → English | 0.90 | 0.86 | 4.0 | 3.2 |
-| long (>800 chars) | → Claudish | 0.88 | 0.78 | 2.0 | 1.4 |
-| long (>800 chars) | → English | 0.90 | 0.80 | 3.8 | 1.9 |
-
-v2's headline fix over v1: long inputs no longer degenerate (v1 collapsed to ~0.21×
-input length with 0.48 reference similarity on the long slice; v2 holds 0.68× and 0.88).
+| Slice | Direction | Meaning | Judge: style | Judge: faithful |
+|---|---|---|---|---|
+| standard | → Claudish | 0.85 | 2.9 (1.7) | 3.3 (2.9) |
+| standard | → English | 0.84 | 4.8 (4.0) | 3.8 (3.2) |
+| long (>800 chars) | → Claudish | 0.88 (0.78) | 3.4 (2.0) | 1.8 (1.4) |
+| long (>800 chars) | → English | 0.90 (0.80) | 4.0 (3.8) | 2.3 (1.9) |
 
 ## Honest assessment
 
-This adapter is a distillation of the official translator, and it inherits that
-teacher's ceiling — the Claude-judged scores above are the candid measure. The
-Claudish → English direction is usable; the English → Claudish direction reads as
-imitation-Claudish (judged 1.7–2.0/5 for style) and can drift or, on long inputs,
-append unrelated content (an artifact of the synthetic long-pair construction). For
-quality-critical restyling, use the
-[style guide](https://github.com/{gh_repo}/blob/main/docs/claudish-style.md) with a
-capable instruction-following model instead — it ships in the same repo for exactly
-this reason. A v3 trained on higher-quality pairs is planned.
+Every judged metric improved over v2, some sharply — Claudish → English is now genuinely
+strong. Two limitations remain. Long-input faithfulness is the weak axis (1.8–2.8/5):
+a 7B model restyling multi-paragraph text still drops or substitutes details, so verify
+outputs on long documents. And the adapter scores below its own training data (which
+judged 3.6/5 style, 3.8/5 faithful) — the usual distillation gap. For quality-critical
+restyling, use the style guide with a capable instruction-following model; it ships in
+the same repo for exactly this reason.
 
 ## Usage
 
