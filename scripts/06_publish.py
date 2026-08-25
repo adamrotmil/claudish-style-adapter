@@ -96,11 +96,10 @@ plain, direct English while preserving all facts and meaning."*
 - Surface-layer style rewriting only: the adapter is trained to preserve facts, certainty,
   and implications, and to never invent content — but verify outputs for high-stakes text.
 - English only; not intended for restyling code blocks or structured markup.
-- Works best on sentence-to-paragraph inputs (training texts were 40–800 characters).
-  The English → Claudish direction can degenerate on much longer inputs — chunk long
-  documents into paragraphs first.
-- Instruction-shaped inputs ("Classify the following...") may occasionally be *answered*
-  rather than restyled.
+- Strongest on sentence-to-paragraph inputs. Long documents no longer degenerate (fixed
+  in v2/v3), but their faithfulness scores are the weakest — verify long outputs.
+- Instruction-shaped inputs are trained to be restyled, never answered (v3 QC-filtered
+  the failure); rare exceptions can still occur.
 """
 
 
