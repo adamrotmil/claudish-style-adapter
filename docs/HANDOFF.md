@@ -52,6 +52,15 @@ Since the move, on the desktop (Apple Silicon, 10 cores, 32 GB):
   rule ("a contrast asserts its negation"). v3 data + adapter backed up in
   outputs_v3_backup/ on the desktop. Judge calls need max_tokens >= 800 (Opus thinks
   first); authoring calls run with thinking disabled for cost.
+- V4 levers, in rough priority: (1) long-input faithfulness (weakest judged axis,
+  1.8-2.8/5 — silent number corruption observed); (2) close the distillation gap
+  (student 2.9/3.3 vs its own data 3.6/3.8 — bigger base or more epochs); (3) data
+  vocabulary diversity: measured over all 10,227 v3 pairs, the top-5 signature nouns
+  (boundary 20%, surface 19%, load-bearing 10%, spine 9%, layer 8%) appear in 49% of
+  pairs, while 31% of pairs use no signature noun at all and the Claudish vocabulary
+  (27,213 distinct words) exceeds the English side (25,179). Fix: rotate per-pair
+  authoring constraints ("lean on register X, avoid boundary/surface") to flatten the
+  skew so the student learns the full palette, not the greatest hits.
 
 Done and verified by real runs:
 
