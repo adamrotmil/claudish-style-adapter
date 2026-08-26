@@ -42,7 +42,9 @@ replacing the earlier distillation of the official
 QC filter (rejecting answered-instead-of-restyled and unfaithful rewrites), including
 1.2k coherent multi-paragraph documents built from embedding-clustered related texts.
 Fine-tuned on `{base_model}` with LoRA (bf16, r=32, all linear projections, 2 epochs,
-max length 2048). Pipeline code:
+max length 2048). The full training set is released as
+[adamrotmil/claudish-pairs](https://huggingface.co/datasets/adamrotmil/claudish-pairs)
+(CC-BY-NC-4.0, with per-pair QC verdicts). Pipeline code:
 [claudish-style-adapter](https://github.com/{gh_repo}).
 
 ## Evaluation (v3 held out; Claude-judged scores are 1-5; v2 in parentheses)
