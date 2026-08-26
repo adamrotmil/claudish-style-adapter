@@ -131,6 +131,19 @@ Or run the Gradio demo:
 python demo/app.py --adapter YourUsername/claudish-style-adapter
 ```
 
+## Use the adapter as the plugin's engine (fully local pipe)
+
+`scripts/claudish_server.py` serves the adapter as an OpenAI-compatible endpoint with a
+built-in **number guard**: numbers, URLs, and file paths must survive the rewrite or the
+original text is returned untouched (fail-open). Point the
+[claudish-to-english](https://github.com/gvzdv/claudish-to-english) plugin at it and every
+Claude Code reply gets rewritten to plain English by these weights, mechanically, no API:
+
+```bash
+python scripts/claudish_server.py --port 8017
+# then set: CLAUDISH_PROVIDER=openai  CLAUDISH_OPENAI_URL=http://localhost:8017/v1
+```
+
 ## The lean alternative: a style guide instead of weights
 
 [`docs/claudish-style.md`](docs/claudish-style.md) is a multi-shot style reference —
