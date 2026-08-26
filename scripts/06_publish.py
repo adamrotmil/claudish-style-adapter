@@ -64,6 +64,18 @@ judged 3.6/5 style, 3.8/5 faithful) — the usual distillation gap. For quality-
 restyling, use the style guide with a capable instruction-following model; it ships in
 the same repo for exactly this reason.
 
+**Plain English** *(the paragraph above, rendered by this adapter itself — verbatim,
+unedited)*:
+
+> All judged metrics improved over v2, some sharply. Claudish → English is now genuinely
+> strong. Two limitations remain: 1) Long-input faithfulness (1.8–2.8/5): A 7B model
+> restyling multi-paragraph text still drops or substitutes details, so verify outputs on
+> long documents; and 2) Adapter scores below its own training data (which judged 3.6/5
+> style, 3.8/5 faithful). For quality-critical restyling, use the style guide with a
+> capable instruction-following model, which ships in the same repo for this reason.
+>
+> *(It dropped one phrase — "the usual distillation gap" — which rather proves the point.)*
+
 ## Examples (real held-out outputs, with the judge's scores)
 
 **The good** — English → Claudish (style 3, faithful 5):
