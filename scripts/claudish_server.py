@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import re
+import threading
 import time
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -62,7 +63,16 @@ class Engine:
         self.llm = Llama(model_path=path, n_ctx=2048,
                          n_threads=os.cpu_count(), verbose=False)
 
+    # llama.cpp contexts are not thread-safe; ThreadingHTTPServer may deliver
+    # concurrent requests (the plugin rewrites message chunks in flight), so
+    # inference is serialized — requests queue instead of corrupting memory.
+    _lock = threading.Lock()
+
     def rewrite(self, text: str) -> dict:
+        with self._lock:
+            return self._rewrite_locked(text)
+
+    def _rewrite_locked(self, text: str) -> dict:
         text = text.strip()
         if not text:
             return {"text": "", "guard": "empty"}
